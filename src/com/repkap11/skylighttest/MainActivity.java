@@ -11,10 +11,14 @@ import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.NetworkInfo.DetailedState;
 import android.os.Bundle;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
@@ -59,6 +63,18 @@ public class MainActivity extends Activity implements GpsStatus.Listener, Locati
 		}
 		TelephonyManager telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
 		telephonyManager.listen(new MyPhoneStateListener(), PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+		
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		   NetworkInfo[] info = cm.getAllNetworkInfo();
+		   for(int i=0; i <info.length-1; i++){
+		       //Log.i("netinfo"+i, info[i].getType()+"");
+		       Log.i("netinfo"+i, info[i].getTypeName());
+		       //Log.i("netinfo"+i, info[i].getSubtype()+"");
+		       Log.i("netinfo"+i, info[i].getSubtypeName());
+		       Log.i("netinfo"+i, info[i].getState().name());
+		       Log.i("netinfo"+i, " ");
+		   }
+		
 	}
 
 	@Override
@@ -89,7 +105,7 @@ public class MainActivity extends Activity implements GpsStatus.Listener, Locati
 				}
 			}
 			mSatList = (ListView) this.findViewById(R.id.main_list_view);
-			Toast.makeText(this, "Num Sats:" + satsArray.size(), Toast.LENGTH_SHORT).show();
+			//Toast.makeText(this, "Num Sats:" + satsArray.size(), Toast.LENGTH_SHORT).show();
 			mSatList.setAdapter(new SatelliteAdapter(this, R.layout.main_list_element, satsArray));
 		} else {
 			Toast.makeText(this, "GpsStatus updated with null.", Toast.LENGTH_SHORT).show();
@@ -98,28 +114,32 @@ public class MainActivity extends Activity implements GpsStatus.Listener, Locati
 
 	@Override
 	public void onLocationChanged(Location location) {
+		if (location != null){
 		mAccuracy.setText(//
-				"Accuracy: " + (location == null ? "null " : location.getAccuracy()) + "meters\n"//
+				"Accuracy: " + location.getAccuracy() + "meters\n"//
 						+ "Lat:" + location.getLatitude() + " Long:" + location.getLongitude());
+	}else{
+		mAccuracy.setText("Location null");
+	}
 	}
 
 	@Override
 	public void onProviderDisabled(String provider) {
-		//Log.e(TAG, "onProviderDisabled");
+		// Log.e(TAG, "onProviderDisabled");
 		Toast.makeText(this, "onProviderDisabled", Toast.LENGTH_SHORT).show();
 
 	}
 
 	@Override
 	public void onProviderEnabled(String provider) {
-		//Log.e(TAG, "onProviderEnabled");
+		// Log.e(TAG, "onProviderEnabled");
 		Toast.makeText(this, "onProviderEnabled", Toast.LENGTH_SHORT).show();
 
 	}
 
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
-		//Log.e(TAG, "onStatusChanged");
+		// Log.e(TAG, "onStatusChanged");
 		Toast.makeText(this, "onStatusChanged", Toast.LENGTH_SHORT).show();
 
 	}

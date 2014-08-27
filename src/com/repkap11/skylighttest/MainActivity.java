@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
@@ -46,31 +45,30 @@ public class MainActivity extends Activity implements GpsStatus.Listener, Locati
 		setContentView(R.layout.activity_main);
 		mAccuracy = (TextView) findViewById(R.id.main_accuracy_text);
 		mCellStrength = (TextView) findViewById(R.id.main_cell_strength_text);
+
 		mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		mLocationManager.addGpsStatusListener(this);
 		mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,//
-				1000L,// update every 1000 miliseconds
+				1000L,// update every 1000 milliseconds
 				1.0f,// or every 1 meter change in position
 				this);
 		onLocationChanged(mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
 		boolean isGPS = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
+		if (!isGPS) {
+			Toast.makeText(this, "Please turn on GPS", Toast.LENGTH_LONG).show();
+		}
 		TelephonyManager telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
 		telephonyManager.listen(new MyPhoneStateListener(), PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
 			return true;
@@ -82,8 +80,7 @@ public class MainActivity extends Activity implements GpsStatus.Listener, Locati
 	public void onGpsStatusChanged(int event) {
 		GpsStatus gpsStatus = mLocationManager.getGpsStatus(null);
 		if (gpsStatus != null) {
-			Iterable<GpsSatellite> satellites = gpsStatus.getSatellites();
-			Iterator<GpsSatellite> sat = satellites.iterator();
+			Iterator<GpsSatellite> sat = gpsStatus.getSatellites().iterator();
 			List<GpsSatellite> satsArray = new ArrayList<GpsSatellite>();
 			while (sat.hasNext()) {
 				GpsSatellite curSatellite = sat.next();
@@ -92,7 +89,7 @@ public class MainActivity extends Activity implements GpsStatus.Listener, Locati
 				}
 			}
 			mSatList = (ListView) this.findViewById(R.id.main_list_view);
-			// Log.e(TAG, "Num Sats:" + satsArray.size());
+			Toast.makeText(this, "Num Sats:" + satsArray.size(), Toast.LENGTH_SHORT).show();
 			mSatList.setAdapter(new SatelliteAdapter(this, R.layout.main_list_element, satsArray));
 		} else {
 			Toast.makeText(this, "GpsStatus updated with null.", Toast.LENGTH_SHORT).show();
@@ -101,24 +98,29 @@ public class MainActivity extends Activity implements GpsStatus.Listener, Locati
 
 	@Override
 	public void onLocationChanged(Location location) {
-		mAccuracy.setText("Accuracy: " + (location == null ? "null " : location.getAccuracy()) + "meters");
+		mAccuracy.setText(//
+				"Accuracy: " + (location == null ? "null " : location.getAccuracy()) + "meters\n"//
+						+ "Lat:" + location.getLatitude() + " Long:" + location.getLongitude());
 	}
 
 	@Override
 	public void onProviderDisabled(String provider) {
-		Log.e(TAG, "onProviderDisabled");
+		//Log.e(TAG, "onProviderDisabled");
+		Toast.makeText(this, "onProviderDisabled", Toast.LENGTH_SHORT).show();
 
 	}
 
 	@Override
 	public void onProviderEnabled(String provider) {
-		Log.e(TAG, "onProviderEnabled");
+		//Log.e(TAG, "onProviderEnabled");
+		Toast.makeText(this, "onProviderEnabled", Toast.LENGTH_SHORT).show();
 
 	}
 
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
-		Log.e(TAG, "onStatusChanged");
+		//Log.e(TAG, "onStatusChanged");
+		Toast.makeText(this, "onStatusChanged", Toast.LENGTH_SHORT).show();
 
 	}
 }
